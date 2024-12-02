@@ -1,0 +1,439 @@
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct Node
+{
+	int data;
+	struct Node* next;
+};
+
+//打印,带头节点
+void NodePrint1(Node* node)
+{
+	Node* next = node->next;
+	while (next)
+	{
+		printf("%d->", next->data);
+		next = next->next;
+	}
+	printf("NULL");
+}
+
+//打印,不带头节点
+void NodePrint2(Node* node)
+{
+	Node* next = node;
+	while (next)
+	{
+		printf("%d->", next->data);
+		next = next->next;
+	}
+	printf("NULL");
+}
+
+//插入，带头节点
+void NodeInsert1(Node** node, int data)
+{
+	//新建结点
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->data = data;
+
+	//链表为空
+	if (!((*node)->next))
+	{
+		newnode->next = (*node)->next;
+		(*node)->next = newnode;
+	}
+	else
+	{
+		//找到尾结点
+		Node* next = (*node)->next;
+		while (next->next)
+		{
+			next = next->next;
+		}
+		newnode->next = next->next;
+		next->next = newnode;
+	}
+}
+
+//插入，不带头节点
+void NodeInsert2(Node** node, int data)
+{
+	//新建结点
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->data = data;
+	newnode->next = NULL;
+
+	//链表为空
+	if (!(*node))
+	{
+		(*node) = newnode;
+	}
+	else
+	{
+		//找到尾结点
+		Node* next = (*node);
+		while (next->next)
+		{
+			next = next->next;
+		}
+		newnode->next = next->next;
+		next->next = newnode;
+	}
+}
+
+//头插，带头节点
+void NodePushHead1(Node** node, int data)
+{
+	//新建结点
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->data = data;
+
+	newnode->next = (*node)->next;
+	(*node)->next = newnode;
+}
+
+//头插，不带头节点
+void NodePushHead2(Node** node, int data)
+{
+	//新建结点
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->data = data;
+
+	newnode->next = (*node);
+	(*node) = newnode;
+}
+
+//尾删，不带头节点,方法一:
+void NodePopTail1(Node** node)
+{
+	if (!(*node)->next)
+	{
+		//不要忘记考虑只剩一个结点的特殊情况
+		free(node);
+		node = NULL;
+	}
+	else
+	{
+		Node* next = (*node);
+		while (next->next->next)
+		{
+			next = next->next;
+		}
+		free(next->next);
+		next->next = NULL;
+	}
+}
+
+//尾删，不带头节点,方法二:
+void NodePopTail2(Node** node)
+{
+	if (!(*node)->next)
+	{
+		//不要忘记考虑只剩一个结点的特殊情况
+		free(*node);
+		(*node) = NULL;
+	}
+	else
+	{
+		Node* front = (*node);
+		Node* tail = (*node)->next;
+		while (tail->next)
+		{
+			front = tail;
+			tail = tail->next;
+		}
+		free(tail);
+		tail = NULL;
+		front->next = NULL;
+	}
+}
+
+//头删，不带头结点
+void NodePopHead(Node** node)
+{
+	Node* next = (*node)->next;
+	free(*node);
+	(*node) = next;
+}
+
+//寻找data值为指定值的结点,可用于重复寻找
+Node* NodeFind(Node* node, int data)
+{
+	Node* next = node;
+	while (next)
+	{
+		if (next->data == data)
+		{
+			return next;
+		}
+		next = next->next;
+	}
+	return NULL;
+}
+
+//在pos位置之前插入结点
+void NodeInsertBefore(Node** node, Node* pos, int data)
+{
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->data = data;
+	newnode->next = NULL;
+
+	//pos在第一个位置
+	if ((*node) == pos)
+	{
+		newnode->next = (*node);
+		(*node) = newnode;
+	}
+	else
+	{
+		Node* next = (*node);
+		while (next->next != pos)
+		{
+			next = next->next;
+		}
+		newnode->next = next->next;
+		next->next = newnode;
+	}
+}
+
+//在pos位置之后插入结点
+void NodeInsertAfter(Node* pos, int data)
+{
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->data = data;
+	newnode->next = NULL;
+
+	newnode->next = pos->next;
+	pos->next = newnode;
+}
+
+//删除pos位置的结点
+void NodeErase(Node** node, Node* pos)
+{
+	if ((*node) == pos)
+	{
+		Node* next = (*node)->next;
+		free(*node);
+		(*node) = next;
+	}
+	else
+	{
+		Node* next = (*node);
+		while (next->next != pos)
+		{
+			next = next->next;
+		}
+		next->next = pos->next;
+		free(pos);
+		pos = NULL;
+	}
+}
+
+void Test1()
+{
+	//有头节点的链表声明
+	Node* node = (Node*)malloc(sizeof(Node));
+	node->next = NULL;
+
+	//插入
+	NodeInsert1(&node, 1);
+	NodeInsert1(&node, 2);
+	NodeInsert1(&node, 3);
+	NodeInsert1(&node, 4);
+	NodeInsert1(&node, 5);
+
+	//头插
+	NodePushHead1(&node, 3);
+	NodePushHead1(&node, 7);
+	NodePushHead1(&node, 8);
+	NodePushHead1(&node, 3);
+	
+	//打印
+	NodePrint1(node);
+
+}
+
+void Test2()
+{
+	//无头节点的链表声明
+	Node* node = NULL;
+
+
+	//插入
+	NodeInsert2(&node, 1);
+	NodeInsert2(&node, 2);
+	NodeInsert2(&node, 3);
+	NodeInsert2(&node, 4);
+	NodeInsert2(&node, 5);
+
+	//头插
+	NodePushHead2(&node, 6);
+	NodePushHead2(&node, 7);
+	NodePushHead2(&node, 8);
+	NodePushHead2(&node, 9);
+
+	//尾删
+	NodePopTail1(&node);
+	NodePopTail1(&node);
+	NodePopTail1(&node);
+
+	NodePopTail2(&node);
+	NodePopTail2(&node);
+	NodePopTail2(&node);
+	NodePopTail2(&node);
+	NodePopTail2(&node);
+	NodePopTail2(&node);
+	
+	//打印
+	NodePrint2(node);
+}
+
+void Test3()
+{
+	//无头节点的链表声明
+	Node* node = NULL;
+
+
+	//插入
+	NodeInsert2(&node, 1);
+	NodeInsert2(&node, 2);
+	NodeInsert2(&node, 3);
+	NodeInsert2(&node, 4);
+	NodeInsert2(&node, 5);
+
+	//头插
+	NodePushHead2(&node, 3);
+	NodePushHead2(&node, 7);
+	NodePushHead2(&node, 8);
+	NodePushHead2(&node, 3);
+
+	
+
+	//打印
+	NodePrint2(node);
+	printf("\n");
+
+	Node* newnode = NodeFind(node, 3);
+	int i = 0;
+	while (newnode)
+	{
+		printf("第%d个3的位置为%p\n", ++i, newnode);
+		newnode = NodeFind(newnode->next, 3);
+	}
+}
+
+void Test4()
+{
+	//无头节点的链表声明
+	Node* node = NULL;
+
+
+	//插入
+	NodeInsert2(&node, 1);
+	NodeInsert2(&node, 2);
+	NodeInsert2(&node, 3);
+	NodeInsert2(&node, 4);
+	NodeInsert2(&node, 5);
+
+	//头插
+	NodePushHead2(&node, 3);
+	NodePushHead2(&node, 7);
+	NodePushHead2(&node, 8);
+	NodePushHead2(&node, 3);
+
+	
+
+	//打印
+	NodePrint2(node);
+	printf("\n");
+
+	//在每个结点数为3的前面插入10
+	Node* newnode = NodeFind(node, 3);
+	
+	while (newnode)
+	{
+		NodeInsertBefore(&node, newnode, 10);
+		newnode = NodeFind(newnode->next, 3);
+	}
+	NodePrint2(node);
+}
+
+void Test5()
+{
+	//无头节点的链表声明
+	Node* node = NULL;
+
+
+	//插入
+	NodeInsert2(&node, 1);
+	NodeInsert2(&node, 2);
+	NodeInsert2(&node, 3);
+	NodeInsert2(&node, 4);
+	NodeInsert2(&node, 4);
+
+	//头插
+	NodePushHead2(&node, 3);
+	NodePushHead2(&node, 4);
+	NodePushHead2(&node, 4);
+	NodePushHead2(&node, 4);
+
+
+
+	//打印
+	NodePrint2(node);
+	printf("\n");
+
+	//在每个结点数为4的后面插入100
+	Node* newnode = NodeFind(node, 4);
+
+	while (newnode)
+	{
+		NodeInsertAfter(newnode, 100);
+		newnode = NodeFind(newnode->next, 4);
+	}
+	NodePrint2(node);
+}
+
+void Test6()
+{
+	//无头节点的链表声明
+	Node* node = NULL;
+
+
+	//插入
+	NodeInsert2(&node, 1);
+	NodeInsert2(&node, 2);
+	NodeInsert2(&node, 3);
+	NodeInsert2(&node, 3);
+	NodeInsert2(&node, 3);
+
+	//头插
+	NodePushHead2(&node, 3);
+	NodePushHead2(&node, 3);
+	NodePushHead2(&node, 8);
+	NodePushHead2(&node, 9);
+
+
+	//打印
+	NodePrint2(node);
+	printf("\n");
+
+	//删除结点数为3的结点
+	Node* newnode = NodeFind(node, 3);
+
+	while (newnode)
+	{
+		NodeErase(&node, newnode);
+		
+		newnode = NodeFind(node, 3);
+	}
+	NodePrint2(node);
+}
+
+
+int main()
+{
+	Test6();
+	return 0;
+}

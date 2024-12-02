@@ -1,0 +1,87 @@
+#include<stdio.h>
+//优化方法：从left,mid与right三个元素中选取适中的元素
+//减少不恰当元素的概率
+//为了减少栈帧空间，每次仅对较小长度的分治空间进行递归
+int medianthree(int left, int right, int mid, int* nums)
+{
+	if ((nums[left] <= nums[mid] && nums[mid] <= nums[right]) || (nums[right] <= nums[mid] && nums[mid] <= nums[left]))
+	{
+		return mid;
+	}
+	else if ((nums[mid] <= nums[left] && nums[left] <= nums[right]) || (nums[right] <= nums[left] && nums[left] <= nums[mid]))
+	{
+		return left;
+	}
+	return right;
+}
+//交换两个数
+void exchange(int* nums, int i, int left)
+{
+	int temp = nums[i];
+	nums[i] = nums[left];
+	nums[left] = temp;
+}
+//哨兵划分
+int partition(int* nums, int left, int right)
+{
+	int med = medianthree(left, right, (left + right) / 2, nums);
+	//将中位数换到最左端
+	exchange(nums, med, left);
+	int i = left;
+	int j = right;
+	while (i < j)
+	{
+
+		while (i<j && nums[j] > nums[left])
+		{
+			j--;
+		}
+		while (i < j && nums[i] < nums[left])
+		{
+			i++;
+		}
+		exchange(nums, i, j);
+	}
+	exchange(nums, i, left);
+	return i;
+}
+//快速排序
+void quicksort(int* nums, int left, int right)
+{
+	//if (left >= right)
+	//{
+	//	return;//只剩一个元素时停止递归
+
+	//}
+	//int pivot = partition(nums, left, right);
+	//partition(nums, left, pivot - 1);
+	//partition(nums, pivot + 1, right);
+
+	//改进:
+	while (left < right)
+	{
+		int pivot = partition(nums, left, right);
+		if (pivot - left > right - pivot)
+		{
+			quicksort(nums, pivot + 1, right);
+			right = pivot - 1;
+		}
+		else
+		{
+			quicksort(nums, left,pivot-1);
+			left = pivot + 1;
+		}
+	}
+}
+int main()
+{
+	int nums[] = { 7,11,2,9,18,17,21,6 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	quicksort(nums, 0, len - 1);
+	for (int i = 0; i < len; i++)
+	{
+		printf("%d ", nums[i]);
+	}
+	printf("\n");
+	return 0;
+}

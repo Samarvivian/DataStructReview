@@ -230,6 +230,19 @@ void NodeErase(Node** node, Node* pos)
 	}
 }
 
+//销毁链表
+void Destory(Node** node)
+{
+	Node* next = (*node);
+	while (next)
+	{
+		Node* pos = next->next;
+		free(next);
+		next = pos;
+	}
+	(*node) = NULL;
+}
+
 void Test1()
 {
 	//有头节点的链表声明

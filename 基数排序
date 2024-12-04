@@ -1,0 +1,77 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+//获得第k位数字
+int digit(int number, int exp)
+{
+	//exp是10^(k-1)
+	return (number / exp) % 10;
+}
+
+void countingsortdigit(int* nums, int len)
+{
+	//找到最大的数字
+	int MAX = 0;
+	for (int i = 0; i < len; i++)
+	{
+		if (MAX < nums[i])
+		{
+			MAX = nums[i];
+		}
+	}
+
+	
+	for (int exp = 1; exp <= MAX; exp*=10)
+	{
+		int* temp = (int*)malloc(sizeof(int) * 10);//最大数为9
+		for (int i = 0; i < 10; i++)
+		{
+			temp[i] = 0;
+		}
+		//获得每个数字的第k位数字，并根据第k位数字进行排序
+		for (int i = 0; i < len; i++)
+		{
+			int index = digit(nums[i], exp);
+			temp[index]++;
+		}
+		//跟计数排序算法一样
+		for (int i = 0; i < 9; i++)
+		{
+			temp[i + 1] += temp[i];
+		}
+		int* res = (int*)malloc(sizeof(int) * len);
+		for (int i = 0; i < len; i++)
+		{
+			res[i] = 0;
+		}
+		for (int i = len - 1; i >= 0; i--)
+		{
+			int index = nums[i];
+			int newindex = digit(index, exp);
+			res[temp[newindex]-1] = index;
+			temp[newindex]--;
+
+		}
+		//将新数组复制回去
+		for (int i = 0; i < len; i++)
+		{
+			nums[i] = res[i];
+		}
+		free(res);
+		free(temp);
+	}
+
+}
+
+int main()
+{
+	int nums[] = { 100902,320879,76790,344567,690218,232347,101000 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	countingsortdigit(nums, len);
+
+	for (int i = 0; i < len; i++)
+	{
+		printf("%d ", nums[i]);
+	}
+	return 0;
+}

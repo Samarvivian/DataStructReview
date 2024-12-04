@@ -1,0 +1,65 @@
+#include<stdio.h>
+#include<stdlib.h>
+void countingsort(int* nums, int len)
+{
+	//先找到最大的数
+	int MAX = 0;
+	for (int i = 0; i < len; i++)
+	{
+		if (nums[i] > MAX)
+		{
+			MAX = nums[i];
+		}
+	}
+
+	int* temp = (int*)malloc(sizeof(int) * (MAX + 1));
+	for (int i = 0; i < MAX + 1; i++)
+	{
+		temp[i] = 0;
+	}
+	for (int i = 0; i < len; i++)
+	{
+		temp[nums[i]]++;
+	}
+
+	for (int i = 0; i < MAX; i++)
+	{
+		//计算前缀和
+		temp[i + 1] += temp[i];
+	}
+
+	//倒着填入元素
+	int* res = (int*)malloc(sizeof(int) * len);
+	for (int i = 0; i < len; i++)
+	{
+		res[i] = 0;
+	}
+	for (int i = len - 1; i >= 0; i--)
+	{
+		int index = nums[i];
+		res[temp[index]-1] = index;
+		temp[index]--;
+	}
+
+	for (int i = 0; i < len; i++)
+	{
+		nums[i] = res[i];
+	}
+
+	//释放内存
+	free(temp);
+	free(res);
+}
+
+int main()
+{
+	int nums[] = { 0,9,3,7,2,0,9,8,7,2,6 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	countingsort(nums, len);
+
+	for (int i = 0; i < len; i++)
+	{
+		printf("%d ", nums[i]);
+	}
+	return 0;
+}

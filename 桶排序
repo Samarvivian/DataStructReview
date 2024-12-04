@@ -1,0 +1,68 @@
+#include<stdio.h>
+#include<stdlib.h>
+void selectionsort(float* nums, int len)
+{
+	int left = 0;
+	int right = len - 1;
+	for (int i = right; i > 0; i--)
+	{
+		float MAX = nums[i];
+		int index = i;
+		for (int j = left; j < i; j++)
+		{
+			if (nums[j] > MAX)
+			{
+				MAX = nums[j];
+				index = j;
+			}
+		}
+		float temp = nums[index];
+		nums[index] = nums[i];
+		nums[i] = temp;
+	}
+}
+void bucketsort(float* nums, int n)
+{
+	int k = n / 2;//划分k个桶
+	int* size = (int*)malloc(sizeof(int) * k);
+	float** bucket = (float**)malloc(sizeof(float*) * k);
+
+	//初始化
+	for (int i = 0; i < k; i++)
+	{
+		bucket[i]= (float*)malloc(sizeof(float) * n);
+		size[i] = 0;
+	}
+	//遍历
+	for (int i = 0; i < n; i++)
+	{
+		int index = nums[i] * k;
+		bucket[index][size[index]++] = nums[i];
+
+	}
+	//对每个桶内元素进行选择排序
+	for (int i = 0; i < k; i++)
+	{
+		selectionsort(bucket[i], size[i]);
+	}
+	//合并
+	int index = 0;
+	for (int i = 0; i < k; i++)
+	{
+		for (int j = 0; j < size[i]; j++)
+		{
+			nums[index++] = bucket[i][j];
+		}
+	}
+}
+int main()
+{
+	float nums[] = { 0.43,0.53,0.27,0.99,0.78,0.19 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	bucketsort(nums, len);
+	for (int i = 0; i < len; i++)
+	{
+		printf("%.2f ", nums[i]);
+	}
+	return 0;
+}

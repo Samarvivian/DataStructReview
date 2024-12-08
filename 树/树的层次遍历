@@ -1,0 +1,104 @@
+//用循环队列实现树的层次遍历
+#include<stdio.h>
+#include<stdlib.h>
+#include<assert.h>
+typedef char ElemType;
+typedef struct Tree
+{
+	ElemType data;
+	struct Tree* lchild;
+	struct Tree* rchild;
+}Tree;
+typedef struct Queue
+{
+	Tree* data;
+	struct Queue* prev;
+	struct Queue* next;
+}Queue;
+
+void createTree(Tree** tree, char* data, int* index)
+{
+	char ch = data[*index];
+	(*index)++;
+
+	//定义当字符为“#”时是一棵空树
+	if (ch == '#')
+	{
+		(*tree) = NULL;
+	}
+	else
+	{
+		(*tree) = (Tree*)malloc(sizeof(Tree));
+		(*tree)->data = ch;
+		createTree(&(*tree)->lchild, data, index);
+		createTree(&(*tree)->rchild, data, index);
+	}
+}
+
+Queue* QueueInit()
+{
+	//这是带头的队列，不需要初始化data
+	Queue* q = (Queue*)malloc(sizeof(Queue));
+	
+	q->next = q;
+	q->prev = q;
+	return q;
+}
+
+void enqueue(Tree* tree, Queue* queue)
+{
+	Queue* newnode = (Queue*)malloc(sizeof(Queue));
+	newnode->data = tree;
+
+	Queue* q = queue->prev;
+	q->next = newnode;
+	newnode->prev = q;
+	queue->prev = newnode;
+	newnode->next = queue;
+}
+
+bool IsEmpty(Queue* queue)
+{
+	return queue->next == queue && queue->prev == queue;
+}
+
+Queue* dequeue(Queue* queue)
+{
+	assert(!IsEmpty(queue));
+	//先进先出
+	Queue* q = queue->next;
+	queue->next = q->next;
+	//不要漏了把后面结点的prev改成queue
+	q->next->prev = queue;
+	return q;
+}
+
+void Level(Tree* tree)
+{
+	Queue* q = QueueInit();
+	enqueue(tree, q);
+	while (!IsEmpty(q))
+	{
+		Queue* node = dequeue(q);
+		printf("%c", node->data->data);
+		if (node->data->lchild)
+		{
+			enqueue(node->data->lchild, q);
+		}
+		if (node->data->rchild)
+		{
+			enqueue(node->data->rchild, q);
+		}
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	Tree* tree;
+	int index = 0;
+	createTree(&tree, argv[1], &index);
+
+	Level(tree);
+
+	return 0;
+}

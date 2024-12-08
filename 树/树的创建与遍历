@@ -1,0 +1,87 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef char ElemType;
+
+typedef struct Tree
+{
+	ElemType data;
+	struct Tree* lchild;
+	struct Tree* rchild;
+}Tree;
+
+void createTree(Tree** tree, char* data, int* index)
+{
+	char ch = data[*index];
+	(*index)++;
+
+	//定义当字符为“#”时是一棵空树
+	if (ch == '#')
+	{
+		(*tree) = NULL;
+	}
+	else
+	{
+		(*tree) = (Tree*)malloc(sizeof(Tree));
+		(*tree)->data = ch;
+		createTree(&(*tree)->lchild, data, index);
+		createTree(&(*tree)->rchild, data, index);
+	}
+}
+
+//前序遍历
+void preorder(Tree* tree)
+{
+	if (!tree)
+	{
+		return;
+	}
+	printf("%c", tree->data);
+	preorder(tree->lchild);
+	preorder(tree->rchild);
+}
+
+//中序遍历
+void inorder(Tree* tree)
+{
+	if (!tree)
+	{
+		return;
+	}
+	
+	inorder(tree->lchild);
+	printf("%c", tree->data);
+	inorder(tree->rchild);
+}
+
+//后序遍历
+void postorder(Tree* tree)
+{
+	if (!tree)
+	{
+		return;
+	}
+
+	postorder(tree->lchild);
+	
+	postorder(tree->rchild);
+	printf("%c", tree->data);
+}
+
+int main(int argc,char* argv[])
+{
+	Tree* tree;
+	int index = 0;
+	createTree(&tree, argv[1], &index);
+
+	preorder(tree);
+	printf("\n");
+
+	inorder(tree);
+	printf("\n");
+
+	postorder(tree);
+	printf("\n");
+
+	return 0;
+}

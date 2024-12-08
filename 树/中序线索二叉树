@@ -1,0 +1,98 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef char ElemType;
+
+typedef struct Tree
+{
+	ElemType data;
+	struct Tree* lchild;
+	struct Tree* rchild;
+	int ltag;
+	int rtag;
+}Tree;
+
+void createTree(Tree** tree, char* data, int* index)
+{
+	char ch = data[*index];
+	(*index)++;
+
+	//定义当字符为“#”时是一棵空树
+	if (ch == '#')
+	{
+		(*tree) = NULL;
+	}
+	else
+	{
+		(*tree) = (Tree*)malloc(sizeof(Tree));
+		(*tree)->data = ch;
+		(*tree)->ltag = 0;
+		(*tree)->rtag = 0;
+		createTree(&(*tree)->lchild, data, index);
+		createTree(&(*tree)->rchild, data, index);
+	}
+}
+
+//线索化
+void Inthread(Tree* tree,Tree** prev)
+{
+	if (tree)
+	{
+		Inthread(tree->lchild,prev);
+		//没有左孩子,左孩子指向前驱
+		if (!tree->lchild)
+		{
+			tree->ltag = 1;
+			tree->lchild = *prev;
+		}
+		//没有右孩子，右孩子指向后继
+		if (*prev!=NULL&&(*prev)->rchild==NULL)
+		{
+			(*prev)->rtag = 1;
+			(*prev)->rchild = tree;
+
+		}
+		(*prev) = tree;
+		Inthread(tree->rchild,prev);
+	}
+}
+
+//拿到第一个结点
+Tree* getFirst(Tree* tree)
+{
+	while(tree->ltag == 0)
+	{
+		tree = tree->lchild;
+	}
+	return tree;
+}
+
+//拿到下一个结点
+Tree* getNext(Tree* tree)
+{
+	//如果右孩子为空，就直接拿它的后继
+	if (tree->rtag == 1)
+	{
+		return tree->rchild;
+	}
+	else
+	{
+		return getFirst(tree->rchild);
+	}
+}
+int main(int argc, char* argv[])
+{
+	Tree* tree;
+	Tree* prev = NULL;
+	int index = 0;
+	createTree(&tree, argv[1], &index);
+
+	Inthread(tree, &prev);
+
+	for (Tree* node = getFirst(tree); node != NULL; node = getNext(node))
+	{
+		printf("%c", node->data);
+	}
+
+	return 0;
+}

@@ -1,0 +1,124 @@
+//用栈实现树的非递归中序前序遍历
+#include<stdio.h>
+#include<stdlib.h>
+#include<assert.h>
+typedef char ElemType;
+typedef struct Tree
+{
+	ElemType data;
+	struct Tree* lchild;
+	struct Tree* rchild;
+};
+typedef struct stack
+{
+	Tree* data;
+	struct stack* next;
+};
+
+void createTree(Tree** tree, char* data, int* index)
+{
+	char ch = data[*index];
+	(*index)++;
+
+	//定义当字符为“#”时是一棵空树
+	if (ch == '#')
+	{
+		(*tree) = NULL;
+	}
+	else
+	{
+		(*tree) = (Tree*)malloc(sizeof(Tree));
+		(*tree)->data = ch;
+		createTree(&(*tree)->lchild, data, index);
+		createTree(&(*tree)->rchild, data, index);
+	}
+}
+
+stack* stackInit()
+{
+	stack* ST = (stack*)malloc(sizeof(stack));
+	ST->data = NULL;
+	ST->next = NULL;
+	return ST;
+}
+
+void stackPush(stack* ST, Tree* tree)
+{
+	stack* node = (stack*)malloc(sizeof(stack));
+	node->data = tree;
+	
+	stack* st = ST->next;
+	ST->next = node;
+	node->next = st;
+}
+
+bool IsEmpty(stack* ST)
+{
+	return ST->next == NULL;
+}
+
+stack* stackPop(stack* ST)
+{
+	assert(!IsEmpty(ST));
+
+	stack* node = ST->next;
+	ST->next = node->next;
+	return node;
+}
+
+void preorder(Tree* tree)
+{
+	stack* ST = stackInit();
+	//用一个结点来移动
+	Tree* node = tree;
+	while (node || (!IsEmpty(ST)))
+	{
+		if (node)
+		{
+			printf("%c", node->data);
+			stackPush(ST, node);
+			node = node->lchild;
+
+		}
+		else
+		{
+			node = stackPop(ST)->data;
+			node = node->rchild;
+		}
+	}
+}
+
+void inorder(Tree* tree)
+{
+	stack* ST = stackInit();
+	//用一个结点来移动
+	Tree* node = tree;
+	while (node || (!IsEmpty(ST)))
+	{
+		if (node)
+		{
+			
+			stackPush(ST, node);
+			node = node->lchild;
+
+		}
+		else
+		{
+			node = stackPop(ST)->data;
+			printf("%c", node->data);
+			node = node->rchild;
+		}
+	}
+}
+
+int main(int argc, char* argv[])
+{
+	Tree* tree;
+	int index = 0;
+	createTree(&tree, argv[1], &index);
+
+	preorder(tree);
+	printf("\n");
+	inorder(tree);
+	return 0;
+}

@@ -1,0 +1,123 @@
+//用栈实现
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<assert.h>
+typedef char ElemType;
+typedef struct Tree
+{
+	ElemType data;
+	struct Tree* lchild;
+	struct Tree* rchild;
+	int flag;//用于指示右孩子是否已经被遍历过
+};
+typedef struct stack
+{
+	Tree* data;
+	struct stack* next;
+};
+
+void createTree(Tree** tree, char* data, int* index)
+{
+	char ch = data[*index];
+	(*index)++;
+
+	//定义当字符为“#”时是一棵空树
+	if (ch == '#')
+	{
+		(*tree) = NULL;
+	}
+	else
+	{
+		(*tree) = (Tree*)malloc(sizeof(Tree));
+		(*tree)->data = ch;
+		(*tree)->flag = 0;
+		createTree(&(*tree)->lchild, data, index);
+		createTree(&(*tree)->rchild, data, index);
+	}
+}
+
+stack* stackInit()
+{
+	stack* ST = (stack*)malloc(sizeof(stack));
+	ST->data = NULL;
+	ST->next = NULL;
+	return ST;
+}
+
+void stackPush(stack* ST, Tree* tree)
+{
+	stack* node = (stack*)malloc(sizeof(stack));
+	node->data = tree;
+
+	stack* st = ST->next;
+	ST->next = node;
+	node->next = st;
+}
+
+bool IsEmpty(stack* ST)
+{
+	return ST->next == NULL;
+}
+
+stack* stackPop(stack* ST)
+{
+	assert(!IsEmpty(ST));
+
+	stack* node = ST->next;
+	ST->next = node->next;
+	return node;
+}
+
+//拿到栈顶元素，不用出栈
+stack* getpop(stack* ST)
+{
+	if (IsEmpty(ST))
+	{
+		return NULL;
+	}
+	else
+	{
+		return ST->next;
+	}
+}
+
+void postorder(Tree* tree)
+{
+	stack* ST = stackInit();
+	Tree* node = tree;
+	while (node || (!IsEmpty(ST)))
+	{
+		if (node)
+		{
+			stackPush(ST, node);
+			node = node->lchild;
+		}
+		else
+		{
+			//先判断是否有右孩子，右孩子是否被遍历过
+			Tree* top = getpop(ST)->data;
+			if (top->rchild && top->rchild->flag == 0)
+			{
+				top->rchild->flag = 1;
+				stackPush(ST, top->rchild);
+				top = top->rchild;
+				node = top->lchild;
+			}
+			else
+			{
+				top = stackPop(ST)->data;
+				printf("%c", top->data);
+			}
+		}
+	}
+}
+int main(int argc, char* argv[])
+{
+	Tree* tree;
+	int index = 0;
+	createTree(&tree, argv[1], &index);
+
+	postorder(tree);
+	return 0;
+}

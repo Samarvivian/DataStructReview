@@ -1,0 +1,226 @@
+#define MAX 10
+#define _CRT_SECURE_NO_WARNINGS 1
+#include<stdlib.h>
+#include<stdio.h>
+#include<string.h>
+//键值对
+typedef struct Pair
+{
+	int key;
+	char* val;
+};
+//链表
+typedef struct Node
+{
+	Pair* pair;
+	struct Node* next;
+};
+//链式地址哈希表
+typedef struct
+{
+	int size;//键值对数量
+	int capacity;//当前最大容量
+	double loadThres;//触发扩容的负载因子阈值
+	int extendratio;//扩容倍数
+	Node** bucket;
+
+}HashMapChaining;
+
+//初始化
+HashMapChaining* Initial()
+{
+	HashMapChaining* hashmap = (HashMapChaining*)malloc(sizeof(HashMapChaining));
+	hashmap->size = 0;
+	hashmap->capacity = 100;
+	hashmap->loadThres = 2.0 / 3.0;
+	hashmap->extendratio = 4;
+	hashmap->bucket = (Node**)malloc(sizeof(Node*) * hashmap->capacity);
+	for (int i = 0; i < hashmap->capacity; i++)
+	{
+		hashmap->bucket[i] = NULL;
+	}
+	return hashmap;
+}
+
+//定义的哈希函数
+int hashFunc(HashMapChaining* hashmap, int key)
+{
+	return key % hashmap->capacity;
+}
+
+//当前的负载因子值
+double loadFactor(HashMapChaining* hashmap)
+{
+	return hashmap->size / hashmap->capacity;
+}
+
+//增加的声明
+void put(HashMapChaining* hashmap, int key, char* val);
+
+//扩容哈希表
+void extend(HashMapChaining* hashmap)
+{
+	//暂存原来哈希表
+	int oldcapacity = hashmap->capacity;
+	Node** oldbucket = hashmap->bucket;
+
+	hashmap->capacity *= hashmap->extendratio;
+	hashmap->bucket = (Node**)malloc(sizeof(Node*) * hashmap->capacity);
+	for (int i = 0; i < hashmap->capacity; i++)
+	{
+		hashmap->bucket[i] = NULL;
+	}
+	//将原来数据复制回去
+	for (int i = 0; i < oldcapacity; i++)
+	{
+		Node* cur = oldbucket[i];
+		while (cur)
+		{
+			put(hashmap, cur->pair->key, cur->pair->val);
+			cur = cur->next;
+			//释放内存
+			Node* temp = cur;
+			free(temp->pair);
+			free(temp);
+		}
+	}
+	free(oldbucket);
+}
+
+//增加哈希表
+void put(HashMapChaining* hashmap, int key, char* val)
+{
+	//判断是否要扩容
+	if (loadFactor(hashmap) > hashmap->loadThres)
+	{
+		extend(hashmap);
+	}
+
+	int index = hashFunc(hashmap, key);
+	Node* cur = hashmap->bucket[index];
+	//寻找是否已经有key值
+	while (cur)
+	{
+		if (cur->pair->key == key)
+		{
+			//覆盖原来的key值
+			cur->pair->val = (char*)malloc(sizeof(char) * (strlen(val)+1));
+			strcpy(cur->pair->val, val);
+			return;
+		}
+		cur = cur->next;
+	}
+	//没有找到，头插
+	Node* newnode = (Node*)malloc(sizeof(Node));
+	newnode->pair = (Pair*)malloc(sizeof(Pair));
+	newnode->pair->val= (char*)malloc(sizeof(char) * (strlen(val)+1));
+	strcpy(newnode->pair->val, val);
+	newnode->pair->key = key;
+	newnode->next = hashmap->bucket[index];
+	hashmap->bucket[index] = newnode;
+	hashmap->size++;
+}
+
+//删除
+void RemoveItem(HashMapChaining* hashmap, int key)
+{
+	int index = hashFunc(hashmap, key);
+	Node* cur = hashmap->bucket[index];
+	Node* pre = NULL;//记录删除结点的前一个结点
+	while (cur)
+	{
+		if (cur->pair->key == key)
+		{
+			if (pre)
+			{
+				//被删除结点不是第一个结点
+				pre->next = cur->next;
+			}
+			else
+			{
+				hashmap->bucket[index] = cur->next;
+			}
+			free(cur->pair);
+			free(cur);
+			hashmap->size--;
+			return;
+		}
+		pre = cur;
+		cur = cur->next;
+	}
+}
+
+//打印
+void print(HashMapChaining* hashmap)
+{
+	for (int i = 0; i < hashmap->capacity; i++)
+	{
+		Node* cur = hashmap->bucket[i];
+		if (cur)
+		{
+			printf("[");
+			while (cur)
+			{
+				printf("%d -> %s  ", cur->pair->key, cur->pair->val);
+				cur = cur->next;
+			}
+			printf("]\n");
+		}
+	}
+}
+
+//查询
+char* Find(HashMapChaining* hashmap, int key)
+{
+	int index = hashFunc(hashmap, key);
+	Node* cur = hashmap->bucket[index];
+	while (cur)
+	{
+		if (cur->pair->key == key)
+		{
+			return cur->pair->val;
+		}
+		cur = cur->next;
+	}
+	//找不到，返回空字符串
+	return NULL;
+}
+
+//销毁哈希表
+void deletehash(HashMapChaining* hashmap)
+{
+	for (int i = 0; i < hashmap->capacity; i++)
+	{
+		Node* node = hashmap->bucket[i];
+		while (node)
+		{
+			Node* temp = node;
+			node = node->next;
+			free(temp->pair);
+			free(temp);
+
+		}
+	}
+	free(hashmap->bucket);
+	free(hashmap);
+}
+
+int main()
+{
+	HashMapChaining* hashmap = Initial();
+	put(hashmap, 100, (char*)"ABC");
+	put(hashmap, 367, (char*)"DEF");
+	put(hashmap, 278, (char*)"GHI");
+	put(hashmap, 600, (char*)"JKL");
+	put(hashmap, 600, (char*)"111");
+	put(hashmap, 667, (char*)"MNO");
+	print(hashmap);
+
+	char* str = Find(hashmap, 667);
+	printf("667--->%s", str);
+	printf("\n");
+
+	RemoveItem(hashmap, 600);
+	print(hashmap);
+	return 0;
+}

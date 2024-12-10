@@ -1,0 +1,66 @@
+//与二叉树的后序遍历算法思想相同
+//先处理左右子数组，再处理总数组
+
+#include<stdio.h>
+#include<stdlib.h>
+//合并阶段
+void merge(int* nums, int left, int mid, int right)
+{
+	int i = left, j = mid + 1;
+	int k = 0;
+	int len = right - left + 1;
+	int* temp = (int*)malloc(sizeof(int) * len);
+	while (i < mid + 1 && j <= right)
+	{
+		if (nums[i] < nums[j])
+		{
+			temp[k++] = nums[i];
+			i++;
+		}
+		else
+		{
+			temp[k++] = nums[j];
+			j++;
+		}
+	}
+	//将剩下的元素直接添加到temp数组中
+	while (i < mid + 1)
+	{
+		temp[k++] = nums[i++];
+	}
+	while (j <= right)
+	{
+		temp[k++] = nums[j++];
+	}
+	//将temp数组元素复制回nums中
+	for (int x = 0; x < len; x++)
+	{
+		nums[left + x] = temp[x];
+	}
+}
+
+void mergesort(int* nums, int left, int right)
+{
+	if (left >= right)
+	{
+		return;
+	}
+	//先处理左右子数组
+	int mid = (left + right) / 2;
+	mergesort(nums, left, mid );
+	mergesort(nums, mid + 1, right);
+	//合并
+	merge(nums, left, mid, right);
+}
+
+int main()
+{
+	int nums[] = { 1,8,9,2,3,67,9,10 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	mergesort(nums, 0, len - 1);
+	for (int i = 0; i < len; i++)
+	{
+		printf("%d ", nums[i]);
+	}
+	return 0;
+}

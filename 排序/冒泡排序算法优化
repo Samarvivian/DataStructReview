@@ -1,0 +1,41 @@
+//增加标志位，当元素之间不再交换时，说明已经达到了有序数列
+#include<stdio.h>
+int bubblesort(int* nums, int len)
+{
+	int count = 0;
+	
+	for (int i = len - 1; i > 0; i--)
+	{
+		bool flag = false;//标志位
+		for (int j = 0; j < i; j++)
+		{
+			if (nums[j] > nums[j + 1])
+			{
+				//交换
+				int temp = nums[j];
+				nums[j] = nums[j + 1];
+				nums[j + 1] = temp;
+				flag = true;
+			}
+			count++;
+		}
+		if (!flag)
+		{
+			break;
+		}
+	}
+	return count;
+}
+int main()
+{
+	int nums[] = { 1,8,9,2,3,67,9 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	int count=bubblesort(nums, len);
+	for (int i = 0; i < len; i++)
+	{
+		printf("%d ", nums[i]);
+	}
+	printf("\n");
+	printf("count=%d ", count);
+	return 0;
+}

@@ -1,0 +1,65 @@
+//为防止递归时栈帧空间的累计，在每次递归前比较两个子空间的长度
+//只递归较小的子空间
+#include<stdio.h>
+void swap(int* nums, int i, int j)
+{
+	int temp = nums[i];
+	nums[i] = nums[j];
+	nums[j] = temp;
+}
+int partion(int* nums, int left, int right)
+{
+	//选定基准数
+	int base = left;
+	int i = left;
+	int j = right;
+
+	//下面内循环这两个while不要交换
+	//例如2 0 1 4 3 5
+	//此时i=1,j=3
+	//如果先是i++,则i会变成3
+	//这次partion之后，4会来到比2小的左边part
+	while (i < j)
+	{
+		while (i < j && nums[j] >= nums[base])
+		{
+			j--;
+		}
+		while (i < j && nums[i] <= nums[base])
+		{
+			i++;
+		}
+		swap(nums, i, j);
+	}
+	swap(nums, base, i);
+	return i;
+}
+void fastsort(int* nums, int left, int right)
+{
+	
+	while (left < right)
+	{
+		int index = partion(nums, left, right);
+		if (index - left > right - index)
+		{
+			fastsort(nums, index + 1, right);
+			right = index - 1;
+		}
+		else
+		{
+			fastsort(nums, left, index - 1);
+			left = index + 1;
+		}
+	}
+}
+int main()
+{
+	int nums[] = { 1,8,9,2,3,67,9,10,99 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	fastsort(nums, 0, len - 1);
+	for (int i = 0; i < len; i++)
+	{
+		printf("%d ", nums[i]);
+	}
+	return 0;
+}

@@ -1,0 +1,43 @@
+//已知长度为n的线性表L采用顺序存储结构。设计一个时间复杂度为O(n)、空间复杂度为O(1)的算法，、
+// //该算法删除线性表中所有值为x的数据元素。
+
+#include<stdio.h>
+int main()
+{
+	int nums[] = { 1,2,1,2,3,2 };
+	int len = sizeof(nums) / sizeof(nums[0]);
+	//法一：
+	/*int x = 2;
+	int i = 0;
+	int k = 0;
+	for (i = 0; i < len; i++)
+	{
+		if (nums[i] != x)
+		{
+			nums[k++] = nums[i];
+		}
+	}
+	for (int j = 0; j < k ; j++)
+	{
+		printf("%d ", nums[j]);
+	}*/
+	//法二：
+	int x = 2;
+	int i = 0, k = 0;
+	for (i = 0; i < len; i++)
+	{
+		if (nums[i] == x)
+		{
+			k++;
+		}
+		else
+		{
+			nums[i - k] = nums[i];
+		}
+	}
+	for (int j = 0; j < i - k; j++)
+	{
+		printf("%d ", nums[j]);
+	}
+	return 0;
+}
